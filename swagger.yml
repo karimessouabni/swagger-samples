@@ -1,87 +1,103 @@
----
-swagger: '2.0'
+swagger: "2.0"
 info:
-  title: os-cells-v2.1
-  version: Unknown
+  version: 1.0.0
+  title: Swagger Petstore
+  license:
+    name: MIT
+host: petstore.swagger.io
+basePath: /v1
+schemes:
+  - http
 consumes:
-- application/json
+  - application/json
 produces:
-- application/json
+  - application/json
 paths:
-  "/v2.1/os-cells":
+  /pets:
     get:
-      operationId: returnallcell
-      summary: Lists cells with details
-      description: |
-        Lists cells with details.
-      produces:
-      - application/json
+      summary: List all pets
+      operationId: listPets
+      tags:
+        - pets
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          type: integer
+          format: int32
       responses:
-        '200':
-          description: 200 response
-          examples:
-            application/json: |-
-              {
-                  "cells": []
-              }
-  "/v2.1/os-cells/cell3":
+        "200":
+          description: A paged array of pets
+          headers:
+            x-next:
+              type: string
+              description: A link to the next page of responses
+          schema:
+            $ref: '#/definitions/Pets'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Create a pet
+      operationId: createPets
+      tags:
+        - pets
+      responses:
+        "201":
+          description: Null response
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /pets/{petId}:
     get:
-      operationId: datacell
-      summary: Shows cell data
-      description: |
-        Shows data for a specified cell.
-      produces:
-      - application/json
+      summary: Info for a specific pet
+      operationId: showPetById
+      tags:
+        - pets
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          description: The id of the pet to retrieve
+          type: string
       responses:
-        '200':
-          description: 200 response
-          examples:
-            application/json: |-
-              {
-                  "cell": {
-                      "username": "username3",
-                      "rpc_host": null,
-                      "type": "child",
-                      "name": "cell3",
-                      "rpc_port": null
-                  }
-              }
-  "/v2.1/os-cells/nova/capacities":
-    get:
-      operationId: cellcapacity
-      summary: Shows cell capacities
-      description: |
-        Shows capacities for a specified cell.
-      produces:
-      - application/json
-      responses:
-        '200':
-          description: 200 response
-          examples:
-            application/json: |-
-              {
-                  "cell": {
-                      "capacities": {
-                          "ram_free": {
-                              "units_by_mb": {
-                                  "8192": 0,
-                                  "512": 13,
-                                  "16384": 0,
-                                  "2048": 3,
-                                  "4096": 1
-                              },
-                              "total_mb": 7680
-                          },
-                          "disk_free": {
-                              "units_by_mb": {
-                                  "0": 0,
-                                  "20480": 46,
-                                  "40960": 23,
-                                  "163840": 5,
-                                  "81920": 11
-                              },
-                              "total_mb": 1052672
-                          }
-                      }
-                  }
-              }
+        "200":
+          description: Expected response to a valid request
+          schema:
+            $ref: '#/definitions/Pets'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Pet:
+    type: "object"
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      tag:
+        type: string
+  Pets:
+    type: array
+    items:
+      $ref: '#/definitions/Pet'
+  Error:
+    type: "object"
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
